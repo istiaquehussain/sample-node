@@ -18,10 +18,10 @@ jobs:
       - name: Test the application
         run: |
           response=$(curl -s http://localhost:3000)
-          if [[ "$response" == "Hello, World!" ]]; then
+          if [[ "$response" == '{"message":"Hello, World!"}' ]]; then
             echo "Test passed!"
           else
-            echo "Test failed: Expected 'Hello, World!' but got '$response'"
+            echo "Test failed: Expected '{\"message\":\"Hello, World!\"}' but got '$response'"
             exit 1
           fi
       - name: Stop the Docker container

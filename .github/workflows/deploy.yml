@@ -1,0 +1,27 @@
+name: pull the image from docker hub and deploy the sample-node application in ec2 instance
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: SSH into EC2 and deploy the application
+        uses: appleboy/ssh-action@v0.1.7
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            docker pull ${{ secrets.DOCKER_USERNAME }}/sample-node:latest
+            docker stop sample-node || true
+            docker rm sample-node || true
+            docker run -d -p 3000:3000 --name sample-node ${{ secrets.DOCKER_USERNAME }}/sample-node:latest
+            sleep 5
+            response=$(curl -s http://localhost:3000)
+            if [[ "$response" == "Hello, World!" ]]; then
+              echo "Deployment test passed!"
+            else
+              echo "Deployment test failed: Expected 'Hello, World!' but got '$response'"
+              exit 1
+            fi  

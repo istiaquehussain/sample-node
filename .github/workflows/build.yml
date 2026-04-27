@@ -1,0 +1,33 @@
+name: dockerize sample-node application
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Build the Docker image
+        run: docker build -t sample-node:latest .
+      - name: Run the Docker container
+        run: docker run -d -p 3000:3000 --name sample-node sample-node:latest
+      - name: Wait for the application to start
+        run: sleep 5
+      - name: Test the application
+        run: |
+          response=$(curl -s http://localhost:3000)
+          if [[ "$response" == "Hello, World!" ]]; then
+            echo "Test passed!"
+          else
+            echo "Test failed: Expected 'Hello, World!' but got '$response'"
+            exit 1
+          fi
+      - name: Stop the Docker container
+        run: docker stop sample-node
+      - name: push the image to docker hub
+        run: |
+          echo ${{ secrets.DOCKER_PASSWORD }} | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
+          docker tag sample-node:latest ${{ secrets.DOCKER_USERNAME }}/sample-node:latest
+          docker push ${{ secrets.DOCKER_USERNAME }}/sample-node:latest  

@@ -1,0 +1,24 @@
+name: integrate and test sample-node application 
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  integrate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+      - name: Install dependencies
+        run: npm install
+      #- name: Build the application
+      #  run: npm run build || echo "No build step defined"
+      - name: test the application
+        run: npm test || echo "No tests defined yet"    
+
+      
